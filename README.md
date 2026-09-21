@@ -14,17 +14,17 @@ Start a new game from the app menu. The game opens with the board and the availa
 
 ### Pieces
 
-Each player begins with 21 polyomino pieces, made from one to five connected squares. Pieces begin in the piece-selection area and can be dragged onto the board.
+Each player begins with 21 polyomino pieces, made from one to five connected squares. Pieces begin in the piece-selection area, are dragged onto the board, and can then be rotated or flipped.
 
-![Piece placement](../app/src/main/res/drawable/blokish_2_pieces.png)
+![Dragging a piece](app/src/main/res/drawable/blokish_dragging.png)
+
+![Rotating a piece](app/src/main/res/drawable/blokish_rotating.png)
+
+![Placing pieces](app/src/main/res/drawable/blokish_2_pieces.png)
 
 ### Piece Controls
 
 While a piece is selected, it can be moved around the board. The circular controls rotate it, a long press flips it, and the confirmation or cancel control accepts or returns it.
-
-![Dragging a piece](../app/src/main/res/drawable/blokish_dragging.png)
-
-![Rotating a piece](../app/src/main/res/drawable/blokish_rotating.png)
 
 ## Testing a Change
 
@@ -64,5 +64,5 @@ Repeat the build, install, and launch commands after each code change you want t
 
 You will begin the following tasks in order. 
 
-- [Task 1: Multiple-piece interaction state](task-1-multiple-piece-interaction-state.md)
-- [Task 2: Bottom circular rotation control](task-2-bottom-rotation-control.md)
+- [Task 1: Multiple-piece interaction state](debugging-tasks/task-1-multiple-piece-interaction-state.md)
+- [Task 2: Bottom circular rotation control](debugging-tasks/task-2-bottom-rotation-control.md)
