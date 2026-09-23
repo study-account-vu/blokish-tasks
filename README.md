@@ -1,20 +1,20 @@
 # Blokish Debugging Tasks
 
-This folder contains a short orientation to Blokish and two focused debugging tasks.
-
-The tasks are intended to let participants explore the repository and develop their own code-navigation and debugging strategy. This page only explains how the game works and describes the behavior to investigate.
+Blokish is an Android version of the **Blokus** board game. You will complete two debugging tasks in this repository.
 
 ## How the Game Works
 
-Blokish is an Android version of the **Blokus** board game. Up to four players place pieces on a 20 x 20 board. A piece must touch one of the player's own pieces at a corner, but pieces from the same player may not share an edge. The goal is to place as many squares as possible.
+Up to four players place pieces on a 20 × 20 board. Pieces from the same player may touch at a corner but may not share an edge. The goal is to place as many squares as possible.
 
 ### Starting a Game
 
-Start a new game from the app menu. The game opens with the board and the available pieces shown in the piece-selection area. The app can use AI opponents, or AI can be disabled for local human play.
+To open the game menu, swipe from the left side of the screen toward the right and select **New Game**.
 
-### Pieces
+Available pieces appear in the piece-selection area.
 
-Each player begins with 21 polyomino pieces, made from one to five connected squares. Pieces begin in the piece-selection area, are dragged onto the board, and can then be rotated or flipped.
+### Pieces and Controls
+
+Pieces can be dragged from the selection area onto the board. While a piece is active, it can be moved, rotated, flipped, accepted, or returned.
 
 ![Dragging a piece](app/src/main/res/drawable/blokish_dragging.png)
 
@@ -22,47 +22,25 @@ Each player begins with 21 polyomino pieces, made from one to five connected squ
 
 ![Placing pieces](app/src/main/res/drawable/blokish_2_pieces.png)
 
-### Piece Controls
+- Drag a piece to move it.
+- Drag the circular controls to rotate it.
+- Long press the piece to flip it.
+- Select **✓** to accept the piece.
+- Select **X** to return the piece.
 
-While a piece is selected, it can be moved around the board. The circular controls rotate it, a long press flips it, and the confirmation or cancel control accepts or returns it.
+## Testing Code Changes
 
-## Testing a Change
+The Android emulator and Blokish will already be running when you begin.
 
-After making a code change, rebuild and reinstall the app before testing it. Two terminals are recommended: the emulator keeps running in the first terminal while the build and Android commands run in the second.
+After modifying the code, use the commands provided in the task instructions to rebuild and restart Blokish.
 
-### Terminal 1: Start the Emulator
-
-Run this command and leave it running:
-
-```bash
-emulator -avd Blokish_API35
-```
-
-### Terminal 2: Build, Install, and Launch
-
-From the repository root, confirm that the emulator is available:
-
-```bash
-adb devices
-```
-
-The emulator should appear in the device list. Then build and install the latest code:
-
-```bash
-./gradlew clean :app:installDebug
-```
-
-Launch the app:
-
-```bash
-adb shell am start -n org.scoutant.blokish/.UI
-```
-
-Repeat the build, install, and launch commands after each code change you want to test.
+If the emulator closes or becomes unavailable, **notify the researcher**.
 
 ## Tasks
 
-You will begin the following tasks in order. 
+Complete the tasks in order:
 
-- [Task 1: Multiple-piece interaction state](debugging-tasks/task-1-multiple-piece-interaction-state.md)
-- [Task 2: Bottom circular rotation control](debugging-tasks/task-2-bottom-rotation-control.md)
+1. [Task 1: Multiple-Piece Interaction](debugging-tasks/task-1-multiple-piece-interaction-state.md)
+2. [Task 2: Bottom Circular Rotation Control](debugging-tasks/task-2-bottom-rotation-control.md)
+
+Please complete Task 1 before beginning Task 2.
