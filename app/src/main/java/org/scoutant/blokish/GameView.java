@@ -79,6 +79,7 @@ public class GameView extends FrameLayout {
 	public BusyIndicator indicator;
 	public PieceUI lasts[] = new PieceUI[4];
 	
+	// Creates the board, piece tray, controls, and player tabs.
 	public GameView(Context context) {
 		super(context);
 		rs = context.getResources();
@@ -139,9 +140,11 @@ public class GameView extends FrameLayout {
 		indicator = new BusyIndicator(context, iView);
 	}
 
+	// Resolves a color resource for this view.
 	protected int getColor( int id) {
 		return ContextCompat.getColor( getContext(), id);
 	}
+	// Resolves a drawable resource for this view.
 	protected Drawable getDrawable( int id) {
 		return ContextCompat.getDrawable( getContext(), id);
 	}
@@ -149,9 +152,11 @@ public class GameView extends FrameLayout {
 
 		private class ShowPiecesListener implements OnClickListener {
 		private int color;
+		// Creates a tab listener for the given player color.
 		protected ShowPiecesListener(int color) {
 			this.color = color;
 		}
+		// Displays the selected player's available pieces.
 		public void onClick(View v) {
 			GameView.this.showPieces(color);
 			GameView.this.invalidate();
@@ -161,6 +166,7 @@ public class GameView extends FrameLayout {
 	public float downX;
 	public float downY;
 
+	// Handles touch gestures received by the board.
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (selected!=null) return false;
@@ -168,6 +174,7 @@ public class GameView extends FrameLayout {
 		return true;
 	}
 	
+	// Tracks horizontal gestures for scrolling the piece tray.
 	public void doTouch(MotionEvent event) {
 		int action = event.getAction(); 
     	if (action==MotionEvent.ACTION_DOWN) {
@@ -184,6 +191,7 @@ public class GameView extends FrameLayout {
     	}
 	}
 	
+	// Draws the board grid and available seed markers.
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -202,6 +210,7 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
+	// Finds a piece view by player color and piece type.
 	public PieceUI findPiece(int color, String type) {
 		PieceUI found=null;
 		for (int i=0; i<getChildCount(); i++) {
@@ -214,10 +223,12 @@ public class GameView extends FrameLayout {
 		return null;
 	}
 
+	// Finds the view that displays the given piece.
 	public PieceUI findPiece(Piece piece) {
 		return findPiece(piece.color, piece.type);
 	}
 	
+	// Plays a move and updates its visual representation.
 	public void play(Move move, boolean animate) {
 		if (move==null) return;
 		PieceUI ui = findPiece( move.piece);
@@ -231,16 +242,19 @@ public class GameView extends FrameLayout {
 		invalidate();
 	}
 	
+	// Shows the available pieces for the given player.
 	public void showPieces(int color){
 		selectedColor = color;
 		for (PieceUI piece : piecesInStore()) piece.setVisibility( piece.piece.color == color ? VISIBLE : INVISIBLE);
 	}
 
+	// Scrolls the given player's piece tray.
 	public void swipePieces( int color, int x) {
 		for (PieceUI piece : piecesInStore(color)) piece.swipe(x);
 	}
 
 	
+	// Reorders pieces after enough moves have been played.
 	public void mayReorderPieces() {
 		gone++;
 		if (gone>=8) {
@@ -249,10 +263,12 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
+	// Reorders the available pieces for every player.
 	public void reorderPieces() {
 		for (int p=0; p<4; p++) reorderPieces( p);
 	}
 
+	// Repositions the available pieces for one player.
 	public void reorderPieces( int color) {
 		List<PieceUI> pieces = piecesInStore(color);
 		Collections.sort(pieces);
@@ -283,6 +299,7 @@ public class GameView extends FrameLayout {
 		}
 	}
 
+	// Returns every movable piece currently in the tray.
 	private List<PieceUI> piecesInStore(){
 		List<PieceUI> list = new ArrayList<PieceUI>(); 
 		for (int k=0; k<this.getChildCount(); k++) {
@@ -295,6 +312,7 @@ public class GameView extends FrameLayout {
 		}
 		return list;
 	}
+	// Returns movable tray pieces for one player.
 	private List<PieceUI> piecesInStore(int color){
 		List<PieceUI> list = new ArrayList<PieceUI>();
 		for (PieceUI piece : piecesInStore()) {
@@ -303,6 +321,7 @@ public class GameView extends FrameLayout {
 		return list;
 	}
 
+	// Replays moves in the view without animation.
 	public boolean replay(List<Move> moves) {
 		for (Move move : moves) {
 			Piece piece = move.piece;

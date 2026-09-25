@@ -14,6 +14,7 @@ import android.view.Window;
 public class SplashScreen extends Activity {
 	private static final long DELAY = 1500;
 
+	// Shows the splash screen and schedules the main activity.
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -32,6 +33,7 @@ public class SplashScreen extends Activity {
 		handler.sendEmptyMessageDelayed(0, delai);
 	}
 
+	// Handler that manages the delayed transition to the main activity.
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -40,6 +42,7 @@ public class SplashScreen extends Activity {
 		}
 	};
 	
+	// Closes the splash screen after the main activity returns to it.
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		finish();
 	};

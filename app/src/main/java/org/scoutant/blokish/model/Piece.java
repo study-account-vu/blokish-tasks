@@ -33,11 +33,13 @@ public class Piece {
 
 	public static final String tag = "sc";
 
+	// Creates a colored piece with its allowed transformations.
 	public Piece( int color, int size, String type, int rotations, int flips ) {
 		this(size, type, rotations, flips);
 		this.color = color;
 	}
 
+	// Creates an uncolored piece with its allowed transformations.
 	public Piece( int size, String type, int rotations, int flips ) {
 		this.size = size;
 		this.type = type;
@@ -47,6 +49,7 @@ public class Piece {
 		odd = (size % 2) == 1; 
 		reset();
 	}
+	// Clears the piece shape and transformation state.
 	public void reset() {
 		r=0;
 		f=0;
@@ -56,6 +59,7 @@ public class Piece {
 		count=0;
 	}
 	
+	// Restores this piece from a saved piece shape.
 	public void reset(Piece ghost) {
 		reset();
 		for (Square s : ghost.squares()) {
@@ -63,16 +67,19 @@ public class Piece {
 		}
 	}
 
+	// Creates an independent copy of this piece.
 	public Piece clone(){
 		Piece clone = new Piece(size, type, rotations, flips);
 		for (Square s : squares()) clone.add(s);
 		return clone;
 	}
 	
+	// Adds a square to this piece.
 	public Piece add(Square s) {
 		return add(s.i, s.j);
 	}
 
+	// Adds a square at the given piece-relative position.
 	public Piece add(int x, int y) {
 		int i=x+h;
 		int j=y+h;
@@ -84,33 +91,41 @@ public class Piece {
 		return this;
 	}
 
+	// Returns the active shape buffer.
 	private int[][] v() {
 		return ( actual ? a : b);
 	}
+	// Returns the inactive shape buffer.
 	private int[][] w() {
 		return ( actual ? b : a);
 	}
 
+	// Switches the active shape buffer.
 	private void toggle() {
 		actual = ! actual;
 	}
 	
+	// Reads a square value from the active shape buffer.
 	private int get(int x, int y) {
 		return v()[x+h][y+h];
 	}
+	// Writes a square value to the inactive shape buffer.
 	private void set(int x, int y, int value) {
 		w()[x+h][y+h] = value;
 	}
 	
+	// Returns the value at a position or zero outside the piece bounds.
 	public int getValue(int x, int y) {
 		if (x<-h || x>=-h+size || y<-h || y>=-h+size ) return 0;
 		return get(x,y);
 	}
+	// Checks whether a position belongs to this piece.
 	public boolean isValue(int x, int y) {
 		return getValue(x, y)>0;
 		
 	}
 	
+	// Rotates the piece one quarter-turn in the requested direction.
 	public Piece rotate(int dir) {
 		for (int y=-h; y<-h+size; y++) {
 			for (int x=-h; x<-h+size; x++) {
@@ -126,6 +141,7 @@ public class Piece {
 		return this;
 	}
 
+	// Mirrors the piece horizontally.
 	public Piece flip() {
 		for (int x=-h; x<-h+size; x++) {
 			for (int y=-h; y<-h+size; y++) {
@@ -138,10 +154,13 @@ public class Piece {
 		return this;
 	}
 
+	// Returns the piece type label.
 	public String toLabel() {
-//		return "[" + type + ", " + r + ", " +f + " ]";
+		//		return "[" + type + ", " + r + ", " +f + " ]";
 		return type;
 	}
+
+	// Returns a grid representation of the piece shape.
 	@Override
 	public String toString() {
 		String str = type + "\n";
@@ -154,16 +173,19 @@ public class Piece {
 		
 	}
 	
+	// Checks whether a position shares an edge with this piece.
 	public boolean touches(int x, int y) {
 		if (isValue(x, y)) return false;
 		return ( isValue(x-1, y) || isValue(x, y-1) || isValue(x+1, y) || isValue(x, y+1));
 	}
+	// Checks whether a position touches this piece at a corner only.
 	public boolean crosses(int x, int y) {
 		if (isValue(x, y)) return false;
 		if (touches(x, y)) return false;
 		return ( isValue(x-1, y-1) || isValue(x+1, y-1) || isValue(x+1, y+1) || isValue(x-1, y+1));
 	}
 
+	// Checks whether this piece overlaps another at the given offset.
 	public boolean overlaps(Piece that, int X, int Y) {
 		if ( Math.abs( X ) > (this.size + that.size)/2 ) return false;  
 		if ( Math.abs( Y ) > (this.size + that.size)/2 ) return false;  
@@ -175,6 +197,7 @@ public class Piece {
 		return false;
 	}
 	
+	// Compares another object with this piece's type and shape.
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
@@ -188,6 +211,7 @@ public class Piece {
 		return true;
 	}
 
+	// Returns the occupied squares of this piece.
 	public List<Square> squares() {
 		List<Square> list = new ArrayList<Square>();
 		for (int y=-h; y<-h+size; y++) {
@@ -198,6 +222,7 @@ public class Piece {
 		return list;
 	}
 	
+	// Returns occupied and blocked squares for the given player color.
 	public List<Square> squares(int color) {
 		List<Square> list = new ArrayList<Square>();
 		if (color != this.color) {
@@ -213,6 +238,7 @@ public class Piece {
 		return list;
 	}
 
+	// Returns the diagonal seed squares created by this piece.
 	public List<Square> seeds() {
 		List<Square> list = new ArrayList<Square>();
 		for (int y=-h-1; y<-h+size+1; y++) {
@@ -223,6 +249,7 @@ public class Piece {
 		return list;
 	}
 	
+	// Serializes a piece shape for storage or replay.
 	/** @return a represention of the piece, like this sample : 2:I3:0,-1:0,0:0,1 */
 	public static String serialize(Piece piece) {
 		String msg = "" + piece.color;

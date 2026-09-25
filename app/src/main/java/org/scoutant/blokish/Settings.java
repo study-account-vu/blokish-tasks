@@ -20,6 +20,7 @@ import android.preference.PreferenceFragment;
 
 /** Magaging app preferences following tutorial : http://jetpad.org/2011/01/creating-a-preference-activity-in-android */
 public class Settings extends PreferenceActivity {
+	// Creates the preferences activity and its settings fragment.
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,7 +32,9 @@ public class Settings extends PreferenceActivity {
 		getActionBar().setDisplayHomeAsUpEnabled(true);		
 	}
 
+	// Fragment that displays the application settings.
 	static public class SettingsFragment extends PreferenceFragment {
+		// Loads the application preference definitions from the XML resource.
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);

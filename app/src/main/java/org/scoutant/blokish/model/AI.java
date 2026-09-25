@@ -36,10 +36,12 @@ public class AI  {
 
 	public int adaptedLevel = 3;
 
+	// Creates an AI that evaluates moves for the given game.
 	public AI(Game game) {
 		this.game = game;
 	}
 
+	// Checks whether the player has at least one legal move.
 	public boolean hasMove(int color) {
 		Board board = game.boards.get(color);
 		for (Square seed : board.seeds()) {
@@ -65,6 +67,7 @@ public class AI  {
 		return false;
 	}
 	
+	// Chooses a move for the player at the requested difficulty level.
 	public Move think(int color, int level) {
 		if (game.boards.get(color).pieces.isEmpty()) {
 			Log.d(tag, "no more pieces for player : " + color);
@@ -103,6 +106,8 @@ public class AI  {
 		move.piece.reset(move.ghost);
 		return move;
 	}
+	
+	// Generates and scores candidate moves up to the level limit.
 	protected List<Move> thinkUpToNMoves(int color, int level) {
 		List<Move> moves = new ArrayList<Move>();
 		Board board = game.boards.get(color);
@@ -171,10 +176,7 @@ public class AI  {
 
 	private int[][] ij = new int [20][20];
 	
-	/**
-	 * Considering we play given @param move. 
-	 * @return true if we may place a piece on newly created seeds.
-	 */
+	// Scores the best follow-up move created by a candidate move.
 	protected int chainingScore(int color, Move move) {
 		Board board = game.boards.get(color);
 		Piece played = move.piece;
@@ -226,6 +228,7 @@ public class AI  {
 		return score;
 	}
 	
+	// Checks whether a piece would overlap the simulated board.
 	public boolean overlaps( int color, Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			int I = i+s.i;
@@ -236,6 +239,7 @@ public class AI  {
 	}
 
 	
+	// Lowers the search level when a search takes too long.
 	private void autoAdaptLevel(long startedAt) {
 		long duration = new Date().getTime()- startedAt;
 		Log.d(tag, "lasted : " + duration );

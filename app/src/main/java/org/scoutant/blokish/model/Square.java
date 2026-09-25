@@ -19,24 +19,29 @@ public class Square implements Comparable<Square> {
 	public int j;
 	public int value;
 	
+	// Creates a square at the given board coordinates.
 	public Square(int i, int j) {
 		this.i=i;
 		this.j=j;
 	}
+	// Creates a square at the given coordinates with a board value.
 	public Square(int i, int j, int value) {
 		this(i,j);
 		this.value = value;
 	}
 	
+	// Returns a compact coordinate representation of this square.
 	public String toString() {
 		return "("+i+", "+j+") ";
 	}
 
 	// TODO add criteria including max distance from origin corner : strategy is encouraging invading other's camp before filling one's own area
-	/** So as to order square against center proximity */
+	// Orders squares by their distance from the board center.
 	public int compareTo(Square that) {
 		return this.distance()-that.distance();
 	}
+	
+	// Calculates this square's squared distance from the board center.
 	private int distance() {
 		return (i-10)*(i-10)+(j-10)*(j-10);
 	}

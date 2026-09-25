@@ -7,6 +7,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 public class EndGameDialog extends Dialog {
+	
+	// Creates and displays the end game dialog with the result.
 	public EndGameDialog(final Context context, boolean redwins, String message, final int level, final int score) {
 		super(context);
 		setContentView( R.layout.endgame);

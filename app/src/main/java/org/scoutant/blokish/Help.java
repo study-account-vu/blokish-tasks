@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 public class Help extends Activity {
+	// Creates the help screen and video link.
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

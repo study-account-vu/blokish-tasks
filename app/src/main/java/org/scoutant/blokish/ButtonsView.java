@@ -42,6 +42,7 @@ public class ButtonsView extends FrameLayout {
 
 	private int width;
 
+	// Creates the move confirmation controls.
 	public ButtonsView(Context context) {
 		super(context);
 		this.context = context;
@@ -62,6 +63,7 @@ public class ButtonsView extends FrameLayout {
 	}
 	
 	
+	// Creates and positions an image button.
 	private ImageButton button(int src, OnClickListener l, int position) {
 		ImageButton btn = new ImageButton(context);
 		LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL);
@@ -79,22 +81,26 @@ public class ButtonsView extends FrameLayout {
 		
 	}
 
+	// Updates a button's enabled and visible state.
 	protected void setState( ImageButton btn, boolean state) {
 		btn.setEnabled( state);
 //		btn.setAlpha( state ? 200 : 50 );
 		btn.setAlpha( state ? 0.78f : 0.196f );
 	}
 	
+	// Updates whether the confirm button can be used.
 	public void setOkState(boolean state) {
 		setState(ok, state);
 	}
 
+	// Retrieves the owning game view after attachment.
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		game = (GameView) getParent();
 	}
 	
+	// Executes the action associated with the OK button.
 	private OnClickListener doOk = new OnClickListener() {
 		public void onClick(View v) {
 			Log.d(tag, "ok...");
@@ -127,6 +133,8 @@ public class ButtonsView extends FrameLayout {
 			}
 		}
 	};
+
+	// Executes the action associated with the Cancel button.
 	private OnClickListener doCancel = new OnClickListener() {
 		public void onClick(View v) {
 			if (vibrator!=null) vibrator.vibrate(20);
@@ -136,5 +144,4 @@ public class ButtonsView extends FrameLayout {
 			ButtonsView.this.setVisibility(INVISIBLE);
 		}
 	};
-	
 }

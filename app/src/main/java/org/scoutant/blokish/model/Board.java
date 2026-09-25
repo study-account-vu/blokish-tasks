@@ -54,6 +54,7 @@ public class Board {
 	public int score;
 	public boolean over=false;
 
+	// Creates a player's board with its starting corner and all pieces.
 	public Board(int color) {
 		this.color = color;
 		if (color==0) ij[0][0]=1;
@@ -95,6 +96,7 @@ public class Board {
 		nbPieces = pieces.size();
 	}
 	
+	// Finds an available piece by its type label.
 	public Piece findPieceByType(String type) {
 		for (Piece piece:pieces) {
 			if (piece.type.equals(type)) return piece;
@@ -102,6 +104,7 @@ public class Board {
 		return null;
 	}
 	
+	// Adds a piece to the board and updates the player's resources.
 	public void add( Piece piece, int i, int j) {
 		for(Square s : piece.squares(this.color)) {
 			// TODO refactor without try / catch
@@ -121,9 +124,7 @@ public class Board {
 	}
 
 	int[][] ab = new int [20][20];
-	/**
-	 * @return # of seeds if actually adding @param piece at @param i, @param j.
-	 */
+	// Counts the seeds that would remain after adding a piece.
 	public int scoreSeedsIfAdding(Piece piece, int i, int j) {
 		int result=0;
 		for (int b=0; b<20; b++) for (int a=0; a<20; a++) ab[a][b] = ij[a][b];
@@ -138,10 +139,12 @@ public class Board {
 	}
 	
 	
+	// Checks whether a square would fall outside the board.
 	public boolean outside(Square s, int i, int j) {
 		return ( s.i+i<0 || s.i+i>=size || s.j+j<0 || s.j+j>=size );
 	}
 	
+	// Checks whether a piece conflicts with occupied board squares.
 	public boolean overlaps( int color, Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			if (outside(s, i, j)) return true;
@@ -150,11 +153,13 @@ public class Board {
 		return false;
 	}
 	
+	// Checks whether a piece fits within the board without conflicts.
 	public boolean fits( int color, Piece piece, int i, int j) {
 		if (i<-1 || i> size || j<-1 || j>size) return false; 
 		return ! overlaps( color, piece, i, j);
 	}
 	
+	// Checks whether a piece covers one of this board's seeds.
 	public boolean onseed( Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			if ( !outside(s, i, j) && ij[i+s.i][j+s.j]==1) return true;
@@ -162,9 +167,11 @@ public class Board {
 		return false;
 	}
 	
+	// Returns a text representation of the full board.
 	public String toString() {
 		return toString(size);
 	}
+	// Returns a text representation limited to the requested rows.
 	public String toString(int jmax) {
 		String str = "";
 		for (int j=0; j<jmax; j++) {
@@ -175,6 +182,7 @@ public class Board {
 		return str;
 	}
 
+	// Returns all currently available seed squares.
 	public List<Square> seeds() {
 		List<Square> list = new ArrayList<Square>();
 		for (int j=0; j<size; j++) {

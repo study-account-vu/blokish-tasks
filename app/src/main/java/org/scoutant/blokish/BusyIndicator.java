@@ -21,6 +21,7 @@ public class BusyIndicator {
 	private Drawable drawable;
 	private RotateAnimation animation;
 	
+	// Creates a spinner controller for the given view.
 	public BusyIndicator(Context ctx, View view){
 		this.view = view;
 		view.setVisibility(View.INVISIBLE);
@@ -39,6 +40,7 @@ public class BusyIndicator {
 		animation.setStartOffset(0);
 	}
 	
+	// Shows and starts the spinner.
 	public void show(){
 		this.visible = true;
 		uiHandler.post(new Runnable(){
@@ -55,6 +57,7 @@ public class BusyIndicator {
 		});
 	}
 	
+	// Hides the spinner and stops its animation.
 	public void hide(){
 		this.visible = false;
 		uiHandler.post(new Runnable(){

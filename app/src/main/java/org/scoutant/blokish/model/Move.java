@@ -21,6 +21,7 @@ public class Move implements Comparable<Move> {
 	public int score;
 	public Piece ghost;
 	
+	// Creates a move and captures the piece's current shape.
 	public Move (Piece piece, int i, int j) {
 		this.piece = piece;
 		this.i = i;
@@ -28,20 +29,23 @@ public class Move implements Comparable<Move> {
 		this.ghost = piece.clone();
 	}
 	
+	// Creates a scored move and captures the piece's current shape.
 	public Move (Piece piece, int i, int j, int score) {
 		this(piece, i, j);
 		this.score = score;
 	}
 	
+	// Returns a compact description of this move.
 	public String toString() {
 		return "" + piece.color + ":" +piece.type + ":"+i+":"+j+":" + score;
 	}
 
+	// Orders moves by their score.
 	public int compareTo(Move that) {
 		return this.score - that.score;
 	}
 
-	/** @return a represention of the piece, like this sample : 18:16:2:I3:0,-1:0,0:0,1 */
+	// Serializes a move for storage or replay.
 	public static String serialize(Move move) {
 		return String.format( "%s:%s:%s", move.i, move.j, Piece.serialize( move.piece));
 	}

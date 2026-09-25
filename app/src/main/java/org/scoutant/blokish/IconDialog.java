@@ -9,6 +9,7 @@ import android.widget.TextView;
 public class IconDialog extends Dialog {
 	private OnClick listener;
 
+	// Creates a confirmation dialog with the given title.
 	public IconDialog(final Context context, int title_id) {
 		super(context);
 		setContentView( R.layout.simple_dialog);
@@ -30,11 +31,14 @@ public class IconDialog extends Dialog {
 		});
 	}
 
+	// Sets the action to run when the dialog is confirmed.
 	public void setListener( final OnClick listener) {
 		this.listener = listener;
 	}
 
+	// Interface definition for a callback to be invoked when the dialog is confirmed.
 	public interface OnClick {
+		// Called when the dialog is confirmed.
 		void onClick();
 	}
 }
