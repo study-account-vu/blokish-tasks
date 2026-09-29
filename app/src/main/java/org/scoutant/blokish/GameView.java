@@ -34,6 +34,11 @@ import java.util.List;
 
 import androidx.core.content.ContextCompat;
 
+/**
+ * Renders and coordinates the interactive game board and players' piece trays.
+ * It connects the model in {@link Game} to {@link PieceUI} views and delegates
+ * turn progression and AI work to the hosting {@link UI} activity.
+ */
 public class GameView extends FrameLayout {
 	private static String tag = "activity";
 	private final Resources rs;
@@ -63,6 +68,14 @@ public class GameView extends FrameLayout {
 	public BusyIndicator indicator;
 	public PieceUI lasts[] = new PieceUI[4];
 	
+	public float downX;
+	public float downY;
+
+	/**
+	 * Initializes the board, piece trays, score tabs, controls, and busy indicator.
+	 *
+	 * @param context activity context that owns this view and provides game resources
+	 */
 	public GameView(Context context) {
 		super(context);
 		rs = context.getResources();
@@ -120,28 +133,49 @@ public class GameView extends FrameLayout {
 		indicator = new BusyIndicator(context, iView);
 	}
 
+	/**
+	 * Resolves a color resource using the view's current themed context.
+	 * @param id color resource identifier
+	 * @return resolved color value
+	 */
 	protected int getColor( int id) {
 		return ContextCompat.getColor( getContext(), id);
 	}
+
+	/**
+	 * Resolves a drawable resource using the view's current themed context.
+	 * @param id drawable resource identifier
+	 * @return resolved drawable, or {@code null} if unavailable
+	 */
 	protected Drawable getDrawable( int id) {
 		return ContextCompat.getDrawable( getContext(), id);
 	}
 
-
+	/** Selects a player's tray when its score tab is tapped. */
 		private class ShowPiecesListener implements OnClickListener {
 		private int color;
+		/**
+		 * Creates a tab listener for one player.
+		 * @param color player index whose piece tray is selected
+		 */
 		protected ShowPiecesListener(int color) {
 			this.color = color;
 		}
+		/**
+		 * Displays the selected player's remaining pieces.
+		 * @param v tab view receiving the click
+		 */
 		public void onClick(View v) {
 			GameView.this.showPieces(color);
 			GameView.this.invalidate();
 		}
 	}
-	
-	public float downX;
-	public float downY;
 
+	/**
+	 * Routes board-level swipe input unless a piece currently owns the gesture.
+	 * @param event touch event delivered to this view
+	 * @return {@code true} when the event is consumed
+	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (selected!=null) return false;
@@ -149,6 +183,10 @@ public class GameView extends FrameLayout {
 		return true;
 	}
 	
+	/**
+	 * Updates the horizontal tray offset in response to a board swipe gesture.
+	 * @param event touch event supplying the gesture coordinates and action
+	 */
 	public void doTouch(MotionEvent event) {
 		int action = event.getAction(); 
     	if (action==MotionEvent.ACTION_DOWN) {
@@ -165,6 +203,10 @@ public class GameView extends FrameLayout {
     	}
 	}
 	
+	/**
+	 * Draws the 20-by-20 grid and, when enabled, the current player's legal seed markers.
+	 * @param canvas drawing surface supplied by the view system
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -183,6 +225,12 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
+	/**
+	 * Finds the view representing a piece by its owner color and shape identifier.
+	 * @param color owning player index
+	 * @param type stable shape identifier
+	 * @return matching view, or {@code null} when it is not present
+	 */
 	public PieceUI findPiece(int color, String type) {
 		PieceUI found=null;
 		for (int i=0; i<getChildCount(); i++) {
@@ -195,10 +243,20 @@ public class GameView extends FrameLayout {
 		return null;
 	}
 
+	/**
+	 * Finds the view corresponding to a model piece.
+	 * @param piece model piece whose view is requested
+	 * @return matching view, or {@code null} when it is not present
+	 */
 	public PieceUI findPiece(Piece piece) {
 		return findPiece(piece.color, piece.type);
 	}
 	
+	/**
+	 * Applies a model move, updates its piece view and score, and refreshes the board.
+	 * @param move move to apply; {@code null} is ignored
+	 * @param animate whether the placed piece should use its placement animation
+	 */
 	public void play(Move move, boolean animate) {
 		if (move==null) return;
 		PieceUI ui = findPiece( move.piece);
@@ -212,16 +270,26 @@ public class GameView extends FrameLayout {
 		invalidate();
 	}
 	
+	/**
+	 * Shows only the stored pieces belonging to the selected player color.
+	 * @param color player index whose tray should be shown
+	 */
 	public void showPieces(int color){
 		selectedColor = color;
 		for (PieceUI piece : piecesInStore()) piece.setVisibility( piece.piece.color == color ? VISIBLE : INVISIBLE);
 	}
 
+	/**
+	 * Applies a horizontal pixel offset to the specified player's stored pieces.
+	 * @param color player index whose tray should move
+	 * @param x horizontal swipe offset in pixels
+	 */
 	public void swipePieces( int color, int x) {
 		for (PieceUI piece : piecesInStore(color)) piece.swipe(x);
 	}
 
 	
+	/** Periodically recalculates tray order as pieces are removed from play. */
 	public void mayReorderPieces() {
 		gone++;
 		if (gone>=8) {
@@ -230,10 +298,15 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
+	/** Repositions the remaining pieces in all four player trays. */
 	public void reorderPieces() {
 		for (int p=0; p<4; p++) reorderPieces( p);
 	}
 
+	/**
+	 * Sorts and lays out one player's remaining pieces within one or two tray rows.
+	 * @param color player index whose tray should be arranged
+	 */
 	public void reorderPieces( int color) {
 		List<PieceUI> pieces = piecesInStore(color);
 		Collections.sort(pieces);
@@ -262,6 +335,7 @@ public class GameView extends FrameLayout {
 		}
 	}
 
+	/** Collects movable piece views, excluding pieces already placed on the board. */
 	private List<PieceUI> piecesInStore(){
 		List<PieceUI> list = new ArrayList<PieceUI>(); 
 		for (int k=0; k<this.getChildCount(); k++) {
@@ -274,6 +348,8 @@ public class GameView extends FrameLayout {
 		}
 		return list;
 	}
+	
+	/** Returns the stored piece views owned by one player. */
 	private List<PieceUI> piecesInStore(int color){
 		List<PieceUI> list = new ArrayList<PieceUI>();
 		for (PieceUI piece : piecesInStore()) {
@@ -282,6 +358,11 @@ public class GameView extends FrameLayout {
 		return list;
 	}
 
+	/**
+	 * Reconstructs the displayed board by applying the supplied moves without animation.
+	 * @param moves ordered moves to replay
+	 * @return {@code true} after the supplied sequence has been applied
+	 */
 	public boolean replay(List<Move> moves) {
 		for (Move move : moves) {
 			Piece piece = move.piece;

@@ -7,7 +7,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+/** Displays help content and opens the game's instructional video. */
 public class Help extends Activity {
+	/**
+	 * Inflates the help screen and wires its video link to an external player.
+	 * @param savedInstanceState previously saved activity state, if any
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -16,6 +21,10 @@ public class Help extends Activity {
 		
 		View v = findViewById(R.id.video);
 		v.setOnClickListener(new OnClickListener() {
+			/**
+			 * Opens the instructional video using an available video handler.
+			 * @param v video link receiving the click
+			 */
 			public void onClick(View v) {
 				try {
 					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://3Q7ow07uaMw")));  

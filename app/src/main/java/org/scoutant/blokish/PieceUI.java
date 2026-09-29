@@ -33,6 +33,11 @@ import java.util.Calendar;
 
 import androidx.core.content.ContextCompat;
 
+/**
+ * Interactive rendering of one model piece, used both in a player's tray and on the board.
+ * Touch gestures move, rotate, and flip the piece; placement validity is delegated to
+ * the owning {@link GameView}'s game model.
+ */
 public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClickListener, Comparable<PieceUI> {
 
   public static final int PADDING = 4;
@@ -89,6 +94,10 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
   private static int grey = 0x99999999;
   private static int green = 0x3333ee33;
 
+  /**
+   * Initializes gesture handling and display-dependent drawing dimensions.
+   * @param context context used to access display and system services
+   */
   protected PieceUI(Context context) {
     super(context);
     this.context = context;
@@ -107,8 +116,13 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     paint.setColor(grey);
   }
 
+  /** Converts a quick second tap into activation of the shared confirm control. */
   private class DoubleTapListener implements OnClickListener {
     long time = SystemClock.currentThreadTimeMillis();
+    /**
+     * Activates confirmation when two taps occur within the gesture interval.
+     * @param v view receiving the click
+     */
     @Override
     public void onClick(View v) {
       long t = Calendar.getInstance().getTimeInMillis();
@@ -122,6 +136,12 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
+  /**
+   * Creates a view for a model piece, loading color-specific artwork and shape metrics.
+   *
+   * @param context context used to access display services and piece resources
+   * @param piece model piece represented by this view
+   */
   public PieceUI(Context context, Piece piece) {
     this(context);
     this.piece = piece;
@@ -138,14 +158,33 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     disc_ok = getDrawable( R.drawable.disc_ok);
   }
 
+  /**
+   * Resolves a color resource using this view's themed context.
+   * @param id color resource identifier
+   * @return resolved color value
+   */
   protected int getColor( int id) {
     return ContextCompat.getColor( getContext(), id);
   }
+
+  /**
+   * Resolves a drawable resource using this view's themed context.
+   * @param id drawable resource identifier
+   * @return resolved drawable, or {@code null} if unavailable
+   */
   protected Drawable getDrawable( int id) {
     return ContextCompat.getDrawable( getContext(), id);
   }
 
 
+  /**
+   * Creates a piece view and positions it at its initial tray origin.
+   *
+   * @param context context used to create the view
+   * @param piece model piece to display
+   * @param i initial horizontal tray coordinate in cells
+   * @param j initial vertical tray coordinate in cells
+   */
   public PieceUI( Context context, Piece piece, int i, int j){
     this(context, piece);
     i0=i;
@@ -154,16 +193,32 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     setVisibility(INVISIBLE);
   }
 
+  /**
+   * Creates a tray piece view connected to the game's shared confirmation button.
+   *
+   * @param context context used to create the view
+   * @param piece model piece to display
+   * @param i initial horizontal tray coordinate in cells
+   * @param j initial vertical tray coordinate in cells
+   * @param ok confirmation control activated by a double tap
+   */
   public PieceUI( Context context, Piece piece, int i, int j, ImageButton ok){
     this(context, piece, i, j);
     this.ok = ok;
   }
 
+    /** Moves the view to the supplied origin and marks the piece as placed on the board. */
     private void place(int i, int j){
     move(i, j);
     place();
   }
 
+  /**
+   * Places the view on the board and optionally plays its placement animation.
+   * @param i horizontal board origin in cells
+   * @param j vertical board origin in cells
+   * @param animate whether to play the placement animation
+   */
   public void place(int i, int j, boolean animate){
     place(i, j);
     if (animate) {
@@ -171,17 +226,24 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
+  /** Marks the piece as used and makes its view visible on the board. */
   public void place(){
     movable=false;
     setVisibility(VISIBLE);
   }
 
+  /** Restores the piece to its tray origin and clears its temporary rotation state. */
   public void replace(){
     rotating=false;
     move(i0, j0);
   }
 
 
+  /**
+   * Sets the piece origin in cell coordinates and schedules a redraw.
+   * @param i horizontal origin in cells
+   * @param j vertical origin in cells
+   */
   public void move(int i, int j) {
     this.i=i;
     this.j=j;
@@ -189,6 +251,7 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     invalidate();
   }
 
+  /** Re-centers the pointer anchor for the piece's current footprint. */
   private void resetLocalXY(){
     localX=PADDING*size + footprint*size/2;
     localY=PADDING*size + footprint*size/2;
@@ -196,6 +259,10 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     localY += 2*size;
   }
 
+  /**
+   * Offsets this tray piece by a pixel-based horizontal swipe amount.
+   * @param x horizontal swipe offset in pixels
+   */
   public void swipe(int x) {
     swipeX = (x+size/2)/size;
     bringToFront();
@@ -203,6 +270,7 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     invalidate();
   }
 
+  /** Converts board-cell or tray coordinates into this view's pixel frame and margins. */
   private void doLayout() {
     FrameLayout.LayoutParams layout;
     if (j>20) {
@@ -227,6 +295,10 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
   }
 
 
+  /**
+   * Draws the piece, its placement handles, and its color-specific board cells.
+   * @param canvas drawing surface supplied by the view system
+   */
   @Override
   protected void onDraw(Canvas canvas) {
     if (rotating) {
@@ -254,9 +326,14 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
+  /** Retains the active drawing surface for the helper that renders individual piece cells. */
+  /** Retains the active drawing surface for the helper that renders individual piece cells. */
   private void gotCanvas(Canvas canvas) {
     this.canvas = canvas;
   }
+  
+
+  /** Draws one local piece cell, highlighting the most recently placed piece when applicable. */
   private PieceUI add(int i, int j){
     GameView game = (GameView) this.getParent();
     if (game.lasts[piece.color] == this && this.j<=20) {
@@ -273,6 +350,11 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return this;
   }
 
+  /**
+   * Starts selection on a long press, or flips the already selected piece.
+   * @param v view receiving the long press
+   * @return {@code true} when the long press begins selection
+   */
   public boolean onLongClick(View v) {
     if (!movable) return false;
     GameView game = (GameView) v.getParent();
@@ -285,6 +367,12 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return false;
   }
 
+  /**
+   * Processes tray swipes, piece dragging, rotation gestures, and placement validation.
+   * @param v view receiving the touch event
+   * @param event pointer action and coordinates
+   * @return {@code true} if the event is consumed by this listener
+   */
   public boolean onTouch(View v, MotionEvent event) {
     if (statusBarHeight<0) {
       Rect decor = new Rect();
@@ -339,6 +427,7 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
       if (rotating) {
         double r = Math.toDegrees( Math.atan2(event.getX()-radius, radius-event.getY()));
         int a = Double.valueOf( r-rDown).intValue();
+        // Keep angle deltas on the shortest path when the pointer crosses the angular boundary.
         if (a>180) a-= 360;
         if (a<-180) a+= 360;
         if (angle==a) return false;
@@ -382,10 +471,15 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return false;
   }
 
+  /**
+   * Updates the visual marker indicating whether the current placement can be confirmed.
+   * @param value {@code true} to show a valid placement state
+   */
   public void setOkState( boolean value) {
     this.isOk = value;
   }
 
+  /** Snaps a completed free rotation to the nearest quarter turn. */
   private void rotateAgainstGrid(){
     if (angle>45) piece.rotate(1);
     if (angle>135) piece.rotate(1);
@@ -393,16 +487,22 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     if (angle<-135) piece.rotate(-1);
   }
 
+  /**
+   * Rotates the model shape by one quarter turn in the requested direction.
+   * @param dir positive for clockwise, negative for counterclockwise
+   */
   public void rotate(int dir) {
     piece.rotate(dir);
     invalidate();
   }
 
+  /** Mirrors the model shape and refreshes the rendered view. */
   public void flip() {
     piece.flip();
     invalidate();
   }
 
+  /** Identifies the corner handles reserved for rotating rather than dragging. */
   private boolean willRotate(){
     int r = radius/size;
     if (Math.abs( downX-r)<= 1 &&  Math.abs(downY-1) <= 1 ) return true;
@@ -411,11 +511,20 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return false;
   }
 
+  /**
+   * Returns a diagnostic representation containing the current origin and shape.
+   * @return textual description of this view and its piece
+   */
   @Override
   public String toString() {
     return "<PieceUI> : (" + this.i + ", " + this.j + ") ; " + piece;
   }
 
+  /**
+   * Orders tray views by a size/count key so larger shapes can be laid out first.
+   * @param that other piece view to compare with
+   * @return negative, zero, or positive according to the tray ordering key
+   */
   public int compareTo(PieceUI that) {
     return (2*this.piece.count + this.piece.size) - (2*that.piece.count + that.piece.size) ;
   }

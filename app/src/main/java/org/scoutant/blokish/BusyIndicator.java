@@ -10,6 +10,10 @@ import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.RotateAnimation;
 
+/**
+ * Controls an animated spinner on a view while background work is in progress.
+ * Visibility changes are posted to the UI thread through the associated handler.
+ */
 public class BusyIndicator {
 	private View view;
 	private Handler uiHandler;
@@ -17,6 +21,12 @@ public class BusyIndicator {
 	private Drawable drawable;
 	private RotateAnimation animation;
 	
+	/**
+	 * Creates an initially hidden indicator for the supplied view.
+	 *
+	 * @param ctx context used to load the spinner drawable
+	 * @param view view whose background and visibility represent the indicator
+	 */
 	public BusyIndicator(Context ctx, View view){
 		this.view = view;
 		view.setVisibility(View.INVISIBLE);
@@ -26,6 +36,11 @@ public class BusyIndicator {
 		animation.setRepeatCount(Animation.INFINITE);
 		final int cycles = 12;
 		animation.setInterpolator(new Interpolator(){
+			/**
+			 * Converts linear animation progress into fixed visual rotation steps.
+			 * @param input normalized animation progress
+			 * @return stepped progress value
+			 */
 			public float getInterpolation(float input) {
 				return ((int)(input * cycles)) / (float) cycles;
 			}
@@ -35,9 +50,11 @@ public class BusyIndicator {
 		animation.setStartOffset(0);
 	}
 	
+	/** Makes the indicator visible and starts its repeating rotation if needed. */
 	public void show(){
 		this.visible = true;
 		uiHandler.post(new Runnable(){
+			/** Applies the latest visible request and starts rotation when appropriate. */
 			public void run() {
 				view.setVisibility( View.VISIBLE);
 				if(BusyIndicator.this.visible){
@@ -50,9 +67,11 @@ public class BusyIndicator {
 		});
 	}
 	
+	/** Hides the indicator and clears its current animation. */
 	public void hide(){
 		this.visible = false;
 		uiHandler.post(new Runnable(){
+			/** Hides the indicator and clears its animation on the UI thread. */
 			public void run() {
 				view.setVisibility(View.INVISIBLE);
 				if(view.getAnimation() != null){

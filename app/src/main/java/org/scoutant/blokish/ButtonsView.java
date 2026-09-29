@@ -17,6 +17,10 @@ import android.widget.ImageView.ScaleType;
 
 import org.scoutant.blokish.model.Move;
 
+/**
+ * Hosts the cancel and confirm controls used while a piece is being positioned.
+ * The enclosing {@link GameView} supplies the selected piece and applies confirmed moves.
+ */
 public class ButtonsView extends FrameLayout {
 
 	protected static final String tag = "ui";
@@ -30,6 +34,11 @@ public class ButtonsView extends FrameLayout {
 
 	private int width;
 
+	/**
+	 * Creates the move controls and sizes their container to the area below the board.
+	 *
+	 * @param context Android context used to create controls and access system services
+	 */
 	public ButtonsView(Context context) {
 		super(context);
 		this.context = context;
@@ -50,6 +59,15 @@ public class ButtonsView extends FrameLayout {
 	}
 	
 	
+	/**
+	 * Creates a transparent image button and anchors it to one side of the control bar.
+	 * The position value selects left (0) or right (1), matching the cancel and confirm actions.
+	 *
+	 * @param src drawable resource displayed by the button
+	 * @param l click listener invoked when the button is pressed
+	 * @param position side selector: 0 for left, 1 for right
+	 * @return configured image button ready to add to this view
+	 */
 	private ImageButton button(int src, OnClickListener l, int position) {
 		ImageButton btn = new ImageButton(context);
 		LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL);
@@ -67,22 +85,34 @@ public class ButtonsView extends FrameLayout {
 		
 	}
 
+	/**
+	 * Applies the enabled appearance shared by both move controls.
+	 * @param btn control whose state is updated
+	 * @param state whether the control should be enabled
+	 */
 	protected void setState( ImageButton btn, boolean state) {
 		btn.setEnabled( state);
 		btn.setAlpha( state ? 0.78f : 0.196f );
 	}
 	
+	/** Enables or disables move confirmation to reflect placement validity. */
 	public void setOkState(boolean state) {
 		setState(ok, state);
 	}
 
+	/** Captures the parent game view once this control is attached to the hierarchy. */
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		game = (GameView) getParent();
 	}
 	
+	/** Handles the action when the OK button is pressed.*/
 	private OnClickListener doOk = new OnClickListener() {
+		/**
+		 * Commits the selected piece when its current placement is valid.
+		 * @param v confirmation control receiving the click
+		 */
 		public void onClick(View v) {
 			Log.d(tag, "ok...");
 			PieceUI piece = game.selected;
@@ -114,7 +144,12 @@ public class ButtonsView extends FrameLayout {
 		}
 	};
 
+	/** Handles cancellation by returning the selected piece to its tray and hiding the controls. */
 	private OnClickListener doCancel = new OnClickListener() {
+		/**
+		 * Returns the selected piece to its tray without changing the model.
+		 * @param v cancel control receiving the click
+		 */
 		public void onClick(View v) {
 			if (vibrator!=null) vibrator.vibrate(20);
 			Log.d(tag, "cancel...");

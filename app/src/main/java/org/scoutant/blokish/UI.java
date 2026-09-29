@@ -46,6 +46,11 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+/**
+ * Main game activity coordinating navigation, persistence, player turns, and AI work.
+ * The activity owns {@link GameView}, restores saved moves on startup, and presents
+ * dialogs when a game or a player turn concludes.
+ */
 public class UI extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 	private static final int MENU_ITEM_HISTORY = 99;
 	private static final int MENU_ITEM_REPLAY = 101;
@@ -66,6 +71,13 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	private boolean back_pressed;
 	private DrawerLayout drawer;
 
+	public int turn = 0;
+	private AITask task = null;
+	
+	/**
+	 * Initializes the activity, creates a game surface, and restores a saved game if present.
+	 * @param savedInstanceState previously saved activity state, if any
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -80,6 +92,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 	}
 
+	/** Replaces the current game surface with a fresh game and reconnects navigation. */
 	private void newgame() {
 		game = new GameView(UI.this);
 		setContentView( R.layout.activity_main);
@@ -89,25 +102,48 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
 		drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+			/**
+			 * Leaves drawer slide motion to the standard drawer implementation.
+			 * @param drawerView drawer currently moving
+			 * @param slideOffset normalized distance from closed to open
+			 */
 			@Override
 			public void onDrawerSlide(View drawerView, float slideOffset) {}
+			/**
+			 * Updates flip-action visibility to match the current piece selection.
+			 * @param drawerView drawer that has opened
+			 */
 			@Override
 			public void onDrawerOpened(View drawerView) {
 				navigationView.getMenu().findItem(R.id.item_flip).setVisible( game.selected!=null);
 			}
+			/**
+			 * Performs no additional work when the drawer closes.
+			 * @param drawerView drawer that has closed
+			 */
 			@Override
 			public void onDrawerClosed(View drawerView) {}
+			/**
+			 * Leaves drawer state transitions to the standard drawer implementation.
+			 * @param newState updated drawer state constant
+			 */
 			@Override
 			public void onDrawerStateChanged(int newState) {}
 		});
 
 	}
 
+	/** Handles a refresh gesture; the game has no separate pull-to-refresh action. */
 	@Override
 	public void onRefresh() {
 
 	}
 
+	/**
+	 * Rebuilds the options menu to reflect selection, settings, and game mode.
+	 * @param menu menu whose items are rebuilt
+	 * @return {@code true} to display the prepared menu
+	 */
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.clear();
@@ -130,6 +166,11 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		return true;
 	}
 	
+	/**
+	 * Dispatches an options-menu action and updates game or activity state.
+	 * @param item selected menu item
+	 * @return {@code false} after processing the action
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		super.onOptionsItemSelected(item);
@@ -165,17 +206,31 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 			.setMessage(rs.getString(R.string.new_game) + "?")
 			.setCancelable(false)
 			.setPositiveButton(" ", new DialogInterface.OnClickListener() {
+				/**
+				 * Starts a fresh game after confirmation.
+				 * @param dialog new-game confirmation dialog
+				 * @param which selected dialog button identifier
+				 */
 				public void onClick(DialogInterface dialog, int which) {
 					newgame();
 				}
 			})
 			.setNegativeButton(" ", new DialogInterface.OnClickListener() {
+				/**
+				 * Dismisses the confirmation without replacing the current game.
+				 * @param dialog new-game confirmation dialog
+				 * @param id selected dialog button identifier
+				 */
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 				}
 			})
 			.create();
 			dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+				/**
+				 * Applies the custom action icons once the dialog buttons exist.
+				 * @param dialogInterface dialog whose buttons are now available
+				 */
 				@Override
 				public void onShow(DialogInterface dialogInterface) {
 					setButtonImage(dialog, AlertDialog.BUTTON_POSITIVE, R.drawable.checkmark);
@@ -199,6 +254,11 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		return false;
 	}
 
+	/**
+	 * Dispatches a navigation drawer action, closing the drawer after selection.
+	 * @param item selected navigation item
+	 * @return {@code true} after handling the selection
+	 */
 	@Override
 	public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -208,6 +268,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		if (id==R.id.item_preferences) startActivity(new Intent(this, Settings.class));
 		if (id==R.id.item_back) {
 			new Handler().postDelayed(new Runnable() {
+				/** Replays the saved history with the most recent turn removed. */
 				@Override
 				public void run() {
 					List<Move> moves = game.game.moves;
@@ -226,6 +287,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 			final IconDialog dialog = new IconDialog(this, R.string.new_game);
 			dialog.setListener(new IconDialog.OnClick() {
+				/** Replaces the active match with a new game. */
 				@Override
 				public void onClick() {
 					newgame();
@@ -237,11 +299,13 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		if (id==R.id.item_flip) {
 
 			new Handler().postDelayed(new Runnable() {
+				/** Defers selected-piece flipping until the drawer has closed. */
 				@Override
 				public void run() {
 					final PieceUI piece = game.selected;
 					if (piece!=null) {
 						runOnUiThread(new Runnable() {
+							/** Flips the piece and refreshes its candidate-validity indication. */
 							@Override
 							public void run() {
 								piece.flip();
@@ -260,8 +324,12 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		return true;
 	}
 
-
-
+	/**
+	 * Replaces a dialog button's text presentation with the supplied drawable.
+	 * @param dialog dialog containing the button
+	 * @param buttonId alert-dialog button identifier
+	 * @param id drawable resource identifier
+	 */
 	private void setButtonImage( AlertDialog dialog, int buttonId, int id ) {
 		Button button = dialog.getButton( buttonId);
 		Drawable drawable = getResources().getDrawable( id);
@@ -269,27 +337,37 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		button.setCompoundDrawables(drawable, null, null, null);
 	}
 
+	/**
+	 * Starts asynchronous AI processing for the given player and makes it the active turn.
+	 * @param player player index whose AI move is requested
+	 */
 	public void think(int player) {
 		turn = player;
 		new AITask().execute(player);
 	}
 	
+	/** Returns the difficulty selected in preferences, before runtime adaptation. */
 	private int findRequestedLevel() {
 		String level = prefs.getString("aiLevel", "0");
 		return Integer.valueOf(level);
 	}
 	
+	/** Bounds the requested difficulty by the level currently supported at runtime. */
 	private int findLevel() {
 		String level = prefs.getString("aiLevel", "0");
 		int l = Integer.valueOf(level);
 		if (l<0 || l>3) l = 1;
 		return Math.min(l, game.ai.adaptedLevel);
 	}
-	
-	public int turn = 0;
-	private AITask task = null;
+		
 
+	/** Computes and applies one AI move, then advances or concludes the turn sequence. */
 	private class AITask extends AsyncTask<Integer, Void, Move> {
+		/**
+		 * Calculates the selected player's move away from the UI thread.
+		 * @param params one-element array containing the player index
+		 * @return selected move, or {@code null} when none is available
+		 */
 		@Override
 		protected Move doInBackground(Integer... params) {
 			task = this;
@@ -297,6 +375,10 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 			game.indicator.show();
 			return game.ai.think(params[0], findLevel());
 		}
+		/**
+		 * Applies the calculated move and schedules the next player or completion check.
+		 * @param move move returned by the background search
+		 */
 		@Override
 		protected void onPostExecute(Move move) {
 			if (vibrator!=null && !game.redOver) vibrator.vibrate(15);
@@ -324,6 +406,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 				}
 			}
 		}
+		/** Builds the final score message and displays the game result. */
 		private void displayWinnerDialog() {
 			game.indicator.hide();
 			Log.d(tag, "game over !");
@@ -343,11 +426,21 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		}
 	}
 	
+	/** Checks whether the human-controlled player has any legal move remaining. */
 	private class CheckTask extends AsyncTask<Void, Void, Boolean> {
+		/**
+		 * Queries the game model for a legal move off the UI thread.
+		 * @param params unused task parameters
+		 * @return {@code true} if the red player has no legal move
+		 */
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			return !game.ai.hasMove(0);
 		}
+		/**
+		 * Prompts the user to acknowledge a blocked red player when no move exists.
+		 * @param finished whether the background check found no legal move
+		 */
 		@Override
 		protected void onPostExecute(Boolean finished) {
 			if (finished) {
@@ -358,6 +451,11 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 				.setMessage( R.string.red_ko)
 				.setCancelable(false)
 				.setPositiveButton(" ", new DialogInterface.OnClickListener() {
+					/**
+					 * Marks the human player as passed and starts the next AI turn.
+					 * @param dialog acknowledgement dialog
+					 * @param which selected dialog button identifier
+					 */
 					public void onClick(DialogInterface dialog, int which) {
 						game.redOver = true;
 						game.game.boards.get(0).over = true;
@@ -367,6 +465,10 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 					})
 				.create();
 				dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+					/**
+					 * Applies the confirmation icon to the acknowledgement button.
+					 * @param dialogInterface acknowledgement dialog
+					 */
 					@Override
 					public void onShow(DialogInterface dialogInterface) {
 						setButtonImage( dialog, AlertDialog.BUTTON_POSITIVE, R.drawable.checkmark);
@@ -378,6 +480,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	}
 
 	private Toast toast;
+	/** Closes an open drawer or requires a second press before leaving the activity. */
 	@Override
 	public void onBackPressed() {
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -395,6 +498,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		back_pressed = true;
 	}
 
+	/** Writes the current move history to the app-private save file. */
 	private void saveToMovesFile() {
 		try {
 			FileOutputStream fos = openFileOutput("moves.txt", Context.MODE_PRIVATE);
@@ -404,6 +508,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		}
 	}
 
+	/** Serializes an unfinished game's history to the supplied stream and closes it. */
 	private void save(OutputStream os){
 		try {
 			if (os==null) return;
@@ -419,6 +524,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	}
 
 
+	/** Restores game history from the app-private save file when it is available. */
 	private void sourceFromMovesFile() {
 		try {
 			FileInputStream fis = openFileInput("moves.txt");
@@ -430,6 +536,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 
 
+	/** Parses serialized move records, rebuilds their pieces, and replays the resulting history. */
 	private void source(InputStream is) {
 		List<Move> list = new ArrayList<Move>();
 		try {
@@ -460,6 +567,7 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		}
 	}
 
+	/** Cancels outstanding AI work and persists the current game before the activity stops. */
 	@Override
 	protected void onStop() {
 		if (task!=null) {

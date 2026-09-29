@@ -9,6 +9,10 @@ import java.util.Random;
 
 import android.util.Log;
 
+/**
+ * Searches legal placements for each player and ranks candidates using board expansion,
+ * reachable corners, opponent access, and follow-up placement opportunities.
+ */
 public class AI  {
 
 	public static final String tag = "sc";
@@ -24,10 +28,23 @@ public class AI  {
 
 	public int adaptedLevel = 3;
 
+	private int[][] ij = new int [20][20];
+	
+	/**
+	 * Creates a searcher bound to a game model.
+	 *
+	 * @param game game whose boards and pieces are evaluated
+	 */
 	public AI(Game game) {
 		this.game = game;
 	}
 
+	/**
+	 * Tests whether a player has any legal placement among its remaining pieces.
+	 *
+	 * @param color player index whose available moves are examined
+	 * @return {@code true} if at least one legal placement exists
+	 */
 	public boolean hasMove(int color) {
 		Board board = game.boards.get(color);
 		for (Square seed : board.seeds()) {
@@ -52,6 +69,13 @@ public class AI  {
 		return false;
 	}
 	
+	/**
+	 * Selects a candidate move at the requested bounded search level.
+	 *
+	 * @param color player index for which to choose a move
+	 * @param level search depth/effort tier, bounded by {@link #adaptedLevel}
+	 * @return selected move, or {@code null} when no candidate is available
+	 */
 	public Move think(int color, int level) {
 		if (game.boards.get(color).pieces.isEmpty()) {
 			Log.d(tag, "no more pieces for player : " + color);
@@ -86,6 +110,12 @@ public class AI  {
 		return move;
 	}
 	
+	/**
+	 * Enumerates and scores legal placements, stopping at the configured candidate limit.
+	 * @param color player index whose candidates are searched
+	 * @param level search-effort tier selecting the candidate limit
+	 * @return legal candidate moves with heuristic scores
+	 */
 	protected List<Move> thinkUpToNMoves(int color, int level) {
 		List<Move> moves = new ArrayList<Move>();
 		Board board = game.boards.get(color);
@@ -146,9 +176,13 @@ public class AI  {
 		autoAdaptLevel(startedAt);
 		return moves;
 	}
-
-	private int[][] ij = new int [20][20];
 	
+	/**
+	 * Scores how many cells of a large remaining piece could be played immediately afterward.
+	 * @param color player index whose follow-up options are evaluated
+	 * @param move hypothetical first move
+	 * @return occupied-cell count of the best immediately available follow-up piece
+	 */
 	protected int chainingScore(int color, Move move) {
 		Board board = game.boards.get(color);
 		Piece played = move.piece;
@@ -198,6 +232,15 @@ public class AI  {
 		return score;
 	}
 	
+	/**
+	 * Checks the candidate piece against the temporary board used by chaining search.
+	 *
+	 * @param color player index associated with the candidate
+	 * @param piece candidate shape in its current orientation
+	 * @param i candidate horizontal board origin
+	 * @param j candidate vertical board origin
+	 * @return {@code true} if any occupied candidate cell intersects a recorded cell
+	 */
 	public boolean overlaps( int color, Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			int I = i+s.i;
@@ -208,6 +251,7 @@ public class AI  {
 	}
 
 	
+	/** Lowers the allowed search tier when the most recent candidate search exceeds its time budget. */
 	private void autoAdaptLevel(long startedAt) {
 		long duration = new Date().getTime()- startedAt;
 		Log.d(tag, "lasted : " + duration );
