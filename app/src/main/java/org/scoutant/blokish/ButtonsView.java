@@ -1,15 +1,3 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish;
 
@@ -42,7 +30,6 @@ public class ButtonsView extends FrameLayout {
 
 	private int width;
 
-	// Creates the move confirmation controls.
 	public ButtonsView(Context context) {
 		super(context);
 		this.context = context;
@@ -63,7 +50,6 @@ public class ButtonsView extends FrameLayout {
 	}
 	
 	
-	// Creates and positions an image button.
 	private ImageButton button(int src, OnClickListener l, int position) {
 		ImageButton btn = new ImageButton(context);
 		LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL);
@@ -81,26 +67,21 @@ public class ButtonsView extends FrameLayout {
 		
 	}
 
-	// Updates a button's enabled and visible state.
 	protected void setState( ImageButton btn, boolean state) {
 		btn.setEnabled( state);
-//		btn.setAlpha( state ? 200 : 50 );
 		btn.setAlpha( state ? 0.78f : 0.196f );
 	}
 	
-	// Updates whether the confirm button can be used.
 	public void setOkState(boolean state) {
 		setState(ok, state);
 	}
 
-	// Retrieves the owning game view after attachment.
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		game = (GameView) getParent();
 	}
 	
-	// Executes the action associated with the OK button.
 	private OnClickListener doOk = new OnClickListener() {
 		public void onClick(View v) {
 			Log.d(tag, "ok...");
@@ -113,7 +94,6 @@ public class ButtonsView extends FrameLayout {
 			boolean possible = game.game.valid( move);
 			if (possible) {
 				if (vibrator!=null) vibrator.vibrate(20);
-				// TODO refactor with place()
 				piece.movable=false;
 				piece.setLongClickable(false);
 				piece.setClickable(false);
@@ -134,7 +114,6 @@ public class ButtonsView extends FrameLayout {
 		}
 	};
 
-	// Executes the action associated with the Cancel button.
 	private OnClickListener doCancel = new OnClickListener() {
 		public void onClick(View v) {
 			if (vibrator!=null) vibrator.vibrate(20);

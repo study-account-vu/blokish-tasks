@@ -36,9 +36,6 @@ public class AITest {
 		pieces = board.pieces;
     pieces.clear();
 
-//    L4 = board.findPieceByType("L4");
-//		P5 = board.findPieceByType("P5");
-//		I3 = board.findPieceByType("I3");
 	}
 
 	@Test

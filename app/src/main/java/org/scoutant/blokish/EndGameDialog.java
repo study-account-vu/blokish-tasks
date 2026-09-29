@@ -8,11 +8,9 @@ import android.widget.TextView;
 
 public class EndGameDialog extends Dialog {
 	
-	// Creates and displays the end game dialog with the result.
 	public EndGameDialog(final Context context, boolean redwins, String message, final int level, final int score) {
 		super(context);
 		setContentView( R.layout.endgame);
-		// Cf layout issue http://groups.google.com/group/android-developers/browse_thread/thread/f0bb813f643604ec?pli=1
 		getWindow().setLayout( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		TextView tv = (TextView) findViewById(R.id.message);
 		tv.setText( message);

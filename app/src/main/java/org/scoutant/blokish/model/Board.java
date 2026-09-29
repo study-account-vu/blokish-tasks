@@ -1,49 +1,9 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Game resources from a player's point of view!
- * 		// 12 Pentaminos : I, F, L, N, P, T, U, V, W, X, Y, Z
- *		X5: 5, 8, 1
- *		W5: 5, 7, 4
- *		F5: 5, 7, 8
- *		T5: 5, 6, 4
- *		Z5: 5, 6, 4
- *		Y5: 5, 6, 8
- *		N5: 5, 6, 8
- *		U5: 5, 5, 4
- *		V5: 5, 5, 4
- *		P5: 5, 5, 8
- *		L5: 5, 5, 8 
- *		I5: 5, 4, 2
- *		// 5 Tetramonos : I, O, T, L, S
- *		O4: 4, 4, 1
- *		S4: 4, 6, 4
- *		T4: 4, 6, 4
- *		L4: 4, 5, 8
- *		I4: 4, 4, 2
- *		// 2 Triominos : I, L
- *		L3: 3, 5, 4
- *		I3: 3, 4, 2
- *		// Domono and Monomino
- *		I2: 2, 4, 2
- *		O1: 1, 4, 1
- */
 public class Board {
 	public static final String tag = "sc";
 	public int color;
@@ -54,7 +14,6 @@ public class Board {
 	public int score;
 	public boolean over=false;
 
-	// Creates a player's board with its starting corner and all pieces.
 	public Board(int color) {
 		this.color = color;
 		if (color==0) ij[0][0]=1;
@@ -96,7 +55,6 @@ public class Board {
 		nbPieces = pieces.size();
 	}
 	
-	// Finds an available piece by its type label.
 	public Piece findPieceByType(String type) {
 		for (Piece piece:pieces) {
 			if (piece.type.equals(type)) return piece;
@@ -104,11 +62,8 @@ public class Board {
 		return null;
 	}
 	
-	// Adds a piece to the board and updates the player's resources.
 	public void add( Piece piece, int i, int j) {
 		for(Square s : piece.squares(this.color)) {
-			// TODO refactor without try / catch
-//			try { ij[i+s.i][j+s.j] = s.value; } catch (Exception e) {}
 			int I = i+s.i;
 			int J = j+s.j;
 			if (I>=0 && I<size && J>=0 && J<size) ij[I][J] = s.value;
@@ -124,7 +79,6 @@ public class Board {
 	}
 
 	int[][] ab = new int [20][20];
-	// Counts the seeds that would remain after adding a piece.
 	public int scoreSeedsIfAdding(Piece piece, int i, int j) {
 		int result=0;
 		for (int b=0; b<20; b++) for (int a=0; a<20; a++) ab[a][b] = ij[a][b];
@@ -139,12 +93,10 @@ public class Board {
 	}
 	
 	
-	// Checks whether a square would fall outside the board.
 	public boolean outside(Square s, int i, int j) {
 		return ( s.i+i<0 || s.i+i>=size || s.j+j<0 || s.j+j>=size );
 	}
 	
-	// Checks whether a piece conflicts with occupied board squares.
 	public boolean overlaps( int color, Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			if (outside(s, i, j)) return true;
@@ -153,13 +105,11 @@ public class Board {
 		return false;
 	}
 	
-	// Checks whether a piece fits within the board without conflicts.
 	public boolean fits( int color, Piece piece, int i, int j) {
 		if (i<-1 || i> size || j<-1 || j>size) return false; 
 		return ! overlaps( color, piece, i, j);
 	}
 	
-	// Checks whether a piece covers one of this board's seeds.
 	public boolean onseed( Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			if ( !outside(s, i, j) && ij[i+s.i][j+s.j]==1) return true;
@@ -167,11 +117,9 @@ public class Board {
 		return false;
 	}
 	
-	// Returns a text representation of the full board.
 	public String toString() {
 		return toString(size);
 	}
-	// Returns a text representation limited to the requested rows.
 	public String toString(int jmax) {
 		String str = "";
 		for (int j=0; j<jmax; j++) {
@@ -182,7 +130,6 @@ public class Board {
 		return str;
 	}
 
-	// Returns all currently available seed squares.
 	public List<Square> seeds() {
 		List<Square> list = new ArrayList<Square>();
 		for (int j=0; j<size; j++) {

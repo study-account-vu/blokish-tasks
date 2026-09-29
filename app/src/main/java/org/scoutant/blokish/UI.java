@@ -1,15 +1,3 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish;
 
@@ -78,7 +66,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	private boolean back_pressed;
 	private DrawerLayout drawer;
 
-	// Creates the game activity and restores any saved game.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -93,10 +80,8 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 	}
 
-	// Creates a new game view and navigation drawer.
 	private void newgame() {
 		game = new GameView(UI.this);
-//		setContentView(game);
 		setContentView( R.layout.activity_main);
 		FrameLayout container = (FrameLayout) findViewById(R.id.container);
 		container.addView( game);
@@ -118,14 +103,11 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 	}
 
-	// Handles a refresh gesture.
 	@Override
 	public void onRefresh() {
 
 	}
 
-	// Builds the legacy options menu
-	// menu in not show since 3.1, refactored to drawing menu
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.clear();
@@ -148,7 +130,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		return true;
 	}
 	
-	// Handles selections in the legacy options menu.
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		super.onOptionsItemSelected(item);
@@ -218,7 +199,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		return false;
 	}
 
-	// Handles selections in the navigation drawer.
 	@Override
 	public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -282,28 +262,23 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 
 
-	// Replaces a dialog button label with an icon.
 	private void setButtonImage( AlertDialog dialog, int buttonId, int id ) {
 		Button button = dialog.getButton( buttonId);
 		Drawable drawable = getResources().getDrawable( id);
 		drawable.setBounds(drawable.getIntrinsicWidth()/4, 0, drawable.getIntrinsicWidth()*3/4, drawable.getIntrinsicHeight()/2);
 		button.setCompoundDrawables(drawable, null, null, null);
-//		button.setBackgroundColor(Color.TRANSPARENT);
 	}
 
-	// Starts AI play from the given player.
 	public void think(int player) {
 		turn = player;
 		new AITask().execute(player);
 	}
 	
-	// Reads the requested AI difficulty from preferences.
 	private int findRequestedLevel() {
 		String level = prefs.getString("aiLevel", "0");
 		return Integer.valueOf(level);
 	}
 	
-	// Reads a valid AI difficulty adjusted for recent performance.
 	private int findLevel() {
 		String level = prefs.getString("aiLevel", "0");
 		int l = Integer.valueOf(level);
@@ -315,7 +290,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	private AITask task = null;
 
 	private class AITask extends AsyncTask<Integer, Void, Move> {
-		// Calculates the next AI move off the UI thread.
 		@Override
 		protected Move doInBackground(Integer... params) {
 			task = this;
@@ -323,7 +297,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 			game.indicator.show();
 			return game.ai.think(params[0], findLevel());
 		}
-		// Applies an AI move and continues the turn sequence.
 		@Override
 		protected void onPostExecute(Move move) {
 			if (vibrator!=null && !game.redOver) vibrator.vibrate(15);
@@ -351,7 +324,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 				}
 			}
 		}
-		// Displays the result when the game ends.
 		private void displayWinnerDialog() {
 			game.indicator.hide();
 			Log.d(tag, "game over !");
@@ -363,7 +335,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 				 message += rs.getString( R.string.congratulations) + " " + score +".";
 				 if (findRequestedLevel()<(4-1)) message += "\n" + rs.getString( R.string.try_next);
 			} else {
-//				message += "Player " + game.game.colors[winner] + " wins with score : " + score;
 				message += rs.getString( game.game.colors[winner]);
 				message += " " + rs.getString( R.string.wins_with_score) + " : ";
 				message += score;
@@ -373,12 +344,10 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	}
 	
 	private class CheckTask extends AsyncTask<Void, Void, Boolean> {
-		// Checks whether the human player has any legal move.
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			return !game.ai.hasMove(0);
 		}
-		// Prompts the player to end their turn when no move remains.
 		@Override
 		protected void onPostExecute(Boolean finished) {
 			if (finished) {
@@ -409,7 +378,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	}
 
 	private Toast toast;
-	// Closes the drawer or requires a second press before exiting.
 	@Override
 	public void onBackPressed() {
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -427,7 +395,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		back_pressed = true;
 	}
 
-	// Saves the current game to private storage.
 	private void saveToMovesFile() {
 		try {
 			FileOutputStream fos = openFileOutput("moves.txt", Context.MODE_PRIVATE);
@@ -437,13 +404,12 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		}
 	}
 
-	// Writes the unfinished game state to an output stream.
 	private void save(OutputStream os){
 		try {
 			if (os==null) return;
 			if (!game.game.over()) {
 				os.write( game.game.toString().getBytes());
-			} // if gave is over we do not save it, so as to open a blank game next time
+			}  
 			os.close();
 		} catch (FileNotFoundException e) {
 			Log.e(tag, "not found...", e);
@@ -453,7 +419,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 	}
 
 
-	// Restores a saved game from private storage.
 	private void sourceFromMovesFile() {
 		try {
 			FileInputStream fis = openFileInput("moves.txt");
@@ -465,13 +430,12 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 
 
 
-	// Parses saved moves and restores them into the game view.
 	private void source(InputStream is) {
 		List<Move> list = new ArrayList<Move>();
 		try {
 			BufferedReader reader = new BufferedReader( new InputStreamReader(is));
 			String line;
-			reader.readLine(); // first line give the # of moves...
+			reader.readLine();  
 			while ((line = reader.readLine()) != null)   {
 				String[] data = line.split(":");
 				int i = Integer.valueOf(data[0]);
@@ -486,7 +450,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 					piece.add( new Square(x, y ));
 				}
 				Move move = new Move(piece, i, j);
-//				Log.d(tag, "created move : " + move);
 				list.add(move);
 			}
 			newgame();
@@ -497,7 +460,6 @@ public class UI extends AppCompatActivity implements NavigationView.OnNavigation
 		}
 	}
 
-	// Cancels active AI work and saves the game when leaving the activity.
 	@Override
 	protected void onStop() {
 		if (task!=null) {

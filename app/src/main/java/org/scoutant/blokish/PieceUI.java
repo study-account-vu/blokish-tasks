@@ -1,15 +1,3 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish;
 
@@ -57,11 +45,8 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
   private Drawable square;
   private Drawable square_bold;
   private Canvas canvas;
-  /** square size in pixel */
   private int size;
-  /** piece size in # of square */
   private int footprint;
-  /** display footprint */
   private int df;
 
   public Piece piece;
@@ -92,7 +77,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
 
   private float rawX;
   private float rawY;
-  // origin offset
   private int oo;
   private Context context;
   private Vibrator vibrator;
@@ -105,7 +89,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
   private static int grey = 0x99999999;
   private static int green = 0x3333ee33;
 
-  // Creates an empty interactive piece view.
   protected PieceUI(Context context) {
     super(context);
     this.context = context;
@@ -124,17 +107,12 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     paint.setColor(grey);
   }
 
-  /**
-   * Double tap emulation listener
-   */
   private class DoubleTapListener implements OnClickListener {
     long time = SystemClock.currentThreadTimeMillis();
-    // Detects two close taps and confirms the selected piece.
     @Override
     public void onClick(View v) {
       long t = Calendar.getInstance().getTimeInMillis();
       long elapse = t-time;
-//        Log.d("click", "elapse : " + elapse);
       if (elapse<300) {
         Log.d("click", "TAP");
         if (ok!=null) ok.callOnClick();
@@ -144,7 +122,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
-  // Creates an interactive view for a game piece.
   public PieceUI(Context context, Piece piece) {
     this(context);
     this.piece = piece;
@@ -161,17 +138,14 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     disc_ok = getDrawable( R.drawable.disc_ok);
   }
 
-  // Resolves a color resource for this view.
   protected int getColor( int id) {
     return ContextCompat.getColor( getContext(), id);
   }
-  // Resolves a drawable resource for this view.
   protected Drawable getDrawable( int id) {
     return ContextCompat.getDrawable( getContext(), id);
   }
 
 
-  // Creates a piece view at its initial tray position.
   public PieceUI( Context context, Piece piece, int i, int j){
     this(context, piece);
     i0=i;
@@ -180,19 +154,16 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     setVisibility(INVISIBLE);
   }
 
-  // Creates a piece view linked to the confirm button.
   public PieceUI( Context context, Piece piece, int i, int j, ImageButton ok){
     this(context, piece, i, j);
     this.ok = ok;
   }
 
-  // Moves and marks the piece as placed.
     private void place(int i, int j){
     move(i, j);
     place();
   }
 
-  // Places the piece and optionally plays its animation.
   public void place(int i, int j, boolean animate){
     place(i, j);
     if (animate) {
@@ -200,29 +171,24 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
-  // Marks the piece as permanently placed on the board.
   public void place(){
     movable=false;
     setVisibility(VISIBLE);
   }
 
-  // Returns the piece to its initial tray position.
   public void replace(){
     rotating=false;
     move(i0, j0);
   }
 
 
-  // Moves the piece to a board position and refreshes its layout.
   public void move(int i, int j) {
     this.i=i;
     this.j=j;
-    // Caution : Must invoke doLayout every time i and j is modified! invalidate() and onDraw() will operate only if "piece is in viewport". Which will be reevaluated with doLayout()!
     doLayout();
     invalidate();
   }
 
-  // Resets the touch offset used for dragging.
   private void resetLocalXY(){
     localX=PADDING*size + footprint*size/2;
     localY=PADDING*size + footprint*size/2;
@@ -230,7 +196,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     localY += 2*size;
   }
 
-  // Updates the piece's horizontal tray offset.
   public void swipe(int x) {
     swipeX = (x+size/2)/size;
     bringToFront();
@@ -238,7 +203,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     invalidate();
   }
 
-  // Calculates layout parameters from the piece position and state.
   private void doLayout() {
     FrameLayout.LayoutParams layout;
     if (j>20) {
@@ -263,10 +227,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
   }
 
 
-  /**
-   * Caution : must invoke doLayout() before any invalidate() if i or j happened to be updated! As onDraw wont be called if piece is (was) out of  viewport.
-   */
-  // Draws the piece, controls, and board squares.
   @Override
   protected void onDraw(Canvas canvas) {
     if (rotating) {
@@ -281,7 +241,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
       d.setBounds(0, 0, getWidth(), getHeight());
       d.draw(canvas);
 
-      // below, the 4 handles
       paint.setColor( isOk ? green : grey);
       canvas.drawCircle(radius, size, size, paint);
       canvas.drawCircle(radius, 2 * radius - size, size, paint);
@@ -295,11 +254,9 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     }
   }
 
-  // Stores the active canvas for drawing squares.
   private void gotCanvas(Canvas canvas) {
     this.canvas = canvas;
   }
-  // Draws one piece square at its relative location.
   private PieceUI add(int i, int j){
     GameView game = (GameView) this.getParent();
     if (game.lasts[piece.color] == this && this.j<=20) {
@@ -316,7 +273,6 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return this;
   }
 
-  // Selects the piece or flips an already selected piece.
   public boolean onLongClick(View v) {
     if (!movable) return false;
     GameView game = (GameView) v.getParent();
@@ -329,9 +285,7 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return false;
   }
 
-  // Handles dragging, rotating, and dropping the piece.
   public boolean onTouch(View v, MotionEvent event) {
-    // TODO possible to hook it in lifecycle? onAttachedToWindow() is to early...
     if (statusBarHeight<0) {
       Rect decor = new Rect();
       ((Activity) context).getWindow().getDecorView().getWindowVisibleDisplayFrame(decor);
@@ -422,19 +376,16 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
         boolean okState = game.game.valid(piece, i, j) && !game.thinking;
         game.buttons.setOkState( okState);
         setOkState( okState);
-//        if (okState && vibrator!=null) vibrator.vibrate(20);
       }
     }
     invalidate();
     return false;
   }
 
-  // Updates whether the current piece placement is valid.
   public void setOkState( boolean value) {
     this.isOk = value;
   }
 
-  // Applies the drag rotation after snapping it to the grid.
   private void rotateAgainstGrid(){
     if (angle>45) piece.rotate(1);
     if (angle>135) piece.rotate(1);
@@ -442,19 +393,16 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     if (angle<-135) piece.rotate(-1);
   }
 
-  // Rotates the piece by one quarter-turn.
   public void rotate(int dir) {
     piece.rotate(dir);
     invalidate();
   }
 
-  // Mirrors the piece and redraws it.
   public void flip() {
     piece.flip();
     invalidate();
   }
 
-  // Checks whether the touch started on a rotation handle.
   private boolean willRotate(){
     int r = radius/size;
     if (Math.abs( downX-r)<= 1 &&  Math.abs(downY-1) <= 1 ) return true;
@@ -463,13 +411,11 @@ public class PieceUI extends FrameLayout implements OnTouchListener, OnLongClick
     return false;
   }
 
-  // Returns a description of the piece view position and shape.
   @Override
   public String toString() {
     return "<PieceUI> : (" + this.i + ", " + this.j + ") ; " + piece;
   }
 
-  // Orders piece views by piece count and size.
   public int compareTo(PieceUI that) {
     return (2*this.piece.count + this.piece.size) - (2*that.piece.count + that.piece.size) ;
   }

@@ -28,17 +28,14 @@ public class PieceTest {
 	@Test
 	public void testAdd() {
 		Log.d(tag, ""+I3);
-//		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testRotate() {
 		I3.rotate(1);
 		Log.d(tag, "" + I3);
-//		Log.d(tag, "L4 : \n" + L4 );
 
 		L4.rotate(1);
-//		Log.d(tag, "L4 rotated : \n" + L4 );
 	}
 
 	@Test

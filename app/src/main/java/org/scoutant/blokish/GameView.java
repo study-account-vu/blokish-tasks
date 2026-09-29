@@ -1,15 +1,3 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish;
 
@@ -46,9 +34,6 @@ import java.util.List;
 
 import androidx.core.content.ContextCompat;
 
-/**
- * For DnD approach, refer to http://blog.scoutant.org/index.php?post/2011/02/Approche-naturelle-de-Drag-and-Drop-en-Android
- */
 public class GameView extends FrameLayout {
 	private static String tag = "activity";
 	private final Resources rs;
@@ -69,7 +54,6 @@ public class GameView extends FrameLayout {
 	public TextView[] tabs = new TextView[4];
 	
 	public UI ui;
-	/** true if red has acknowledged no more moves for her */
 	public boolean redOver=false;
 	public SharedPreferences prefs;
 	public boolean thinking=false;
@@ -79,7 +63,6 @@ public class GameView extends FrameLayout {
 	public BusyIndicator indicator;
 	public PieceUI lasts[] = new PieceUI[4];
 	
-	// Creates the board, piece tray, controls, and player tabs.
 	public GameView(Context context) {
 		super(context);
 		rs = context.getResources();
@@ -111,7 +94,6 @@ public class GameView extends FrameLayout {
 		for (Board board : game.boards) {
 			int i=2;
 			for (Piece piece : board.pieces) {	
-//				addView( new PieceUI(context, piece, i, 20+2) );
 				addView( new PieceUI(context, piece, i, 20+2, buttons.ok) );
 				i += 4;
 			}
@@ -126,25 +108,21 @@ public class GameView extends FrameLayout {
 			dots[color] = getDrawable(icons[color]);
 			dots[color].setAlpha(191);
 			tabs[color] = (TextView) findViewById( labels[color]);
-			// let put the listener on the parent view group
 			ViewGroup tab  =  (ViewGroup) tabs[color].getParent();
 			if (tab!=null ) {
 				tab.setOnClickListener(new ShowPiecesListener(color));
 			}
 		}
 
-		// progress indicator
 		View iView = new View(context);
 		iView.setLayoutParams(new FrameLayout.LayoutParams(150, 150, Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL));
 		addView(iView);
 		indicator = new BusyIndicator(context, iView);
 	}
 
-	// Resolves a color resource for this view.
 	protected int getColor( int id) {
 		return ContextCompat.getColor( getContext(), id);
 	}
-	// Resolves a drawable resource for this view.
 	protected Drawable getDrawable( int id) {
 		return ContextCompat.getDrawable( getContext(), id);
 	}
@@ -152,11 +130,9 @@ public class GameView extends FrameLayout {
 
 		private class ShowPiecesListener implements OnClickListener {
 		private int color;
-		// Creates a tab listener for the given player color.
 		protected ShowPiecesListener(int color) {
 			this.color = color;
 		}
-		// Displays the selected player's available pieces.
 		public void onClick(View v) {
 			GameView.this.showPieces(color);
 			GameView.this.invalidate();
@@ -166,7 +142,6 @@ public class GameView extends FrameLayout {
 	public float downX;
 	public float downY;
 
-	// Handles touch gestures received by the board.
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (selected!=null) return false;
@@ -174,7 +149,6 @@ public class GameView extends FrameLayout {
 		return true;
 	}
 	
-	// Tracks horizontal gestures for scrolling the piece tray.
 	public void doTouch(MotionEvent event) {
 		int action = event.getAction(); 
     	if (action==MotionEvent.ACTION_DOWN) {
@@ -191,7 +165,6 @@ public class GameView extends FrameLayout {
     	}
 	}
 	
-	// Draws the board grid and available seed markers.
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -210,7 +183,6 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
-	// Finds a piece view by player color and piece type.
 	public PieceUI findPiece(int color, String type) {
 		PieceUI found=null;
 		for (int i=0; i<getChildCount(); i++) {
@@ -223,12 +195,10 @@ public class GameView extends FrameLayout {
 		return null;
 	}
 
-	// Finds the view that displays the given piece.
 	public PieceUI findPiece(Piece piece) {
 		return findPiece(piece.color, piece.type);
 	}
 	
-	// Plays a move and updates its visual representation.
 	public void play(Move move, boolean animate) {
 		if (move==null) return;
 		PieceUI ui = findPiece( move.piece);
@@ -242,19 +212,16 @@ public class GameView extends FrameLayout {
 		invalidate();
 	}
 	
-	// Shows the available pieces for the given player.
 	public void showPieces(int color){
 		selectedColor = color;
 		for (PieceUI piece : piecesInStore()) piece.setVisibility( piece.piece.color == color ? VISIBLE : INVISIBLE);
 	}
 
-	// Scrolls the given player's piece tray.
 	public void swipePieces( int color, int x) {
 		for (PieceUI piece : piecesInStore(color)) piece.swipe(x);
 	}
 
 	
-	// Reorders pieces after enough moves have been played.
 	public void mayReorderPieces() {
 		gone++;
 		if (gone>=8) {
@@ -263,12 +230,10 @@ public class GameView extends FrameLayout {
 		}
 	}
 	
-	// Reorders the available pieces for every player.
 	public void reorderPieces() {
 		for (int p=0; p<4; p++) reorderPieces( p);
 	}
 
-	// Repositions the available pieces for one player.
 	public void reorderPieces( int color) {
 		List<PieceUI> pieces = piecesInStore(color);
 		Collections.sort(pieces);
@@ -276,7 +241,6 @@ public class GameView extends FrameLayout {
 		for (int p=0; p<pieces.size(); p++) {
 			PieceUI piece = pieces.get(p);
 			if (singleline) {
-//				piece.j0 = 22;
 				piece.j0 = 22 + singleLineOffset;
 				if (p<1) {
 					if (piece.piece.type.equals("I5")) piece.i0 = 1;
@@ -285,7 +249,6 @@ public class GameView extends FrameLayout {
 					piece.i0 = pieces.get(p-1).i0 + pieces.get(p-1).piece.size+1;
 				}
 			} else {
-//				piece.j0 = 22 + ((p%2) > 0 ? 5 : 0 ) ;
 				piece.j0 = 22 + ((p%2) > 0 ? 5+secondLineOffset : 0 ) ;
 
 				if (p<2) {
@@ -299,7 +262,6 @@ public class GameView extends FrameLayout {
 		}
 	}
 
-	// Returns every movable piece currently in the tray.
 	private List<PieceUI> piecesInStore(){
 		List<PieceUI> list = new ArrayList<PieceUI>(); 
 		for (int k=0; k<this.getChildCount(); k++) {
@@ -312,7 +274,6 @@ public class GameView extends FrameLayout {
 		}
 		return list;
 	}
-	// Returns movable tray pieces for one player.
 	private List<PieceUI> piecesInStore(int color){
 		List<PieceUI> list = new ArrayList<PieceUI>();
 		for (PieceUI piece : piecesInStore()) {
@@ -321,7 +282,6 @@ public class GameView extends FrameLayout {
 		return list;
 	}
 
-	// Replays moves in the view without animation.
 	public boolean replay(List<Move> moves) {
 		for (Move move : moves) {
 			Piece piece = move.piece;

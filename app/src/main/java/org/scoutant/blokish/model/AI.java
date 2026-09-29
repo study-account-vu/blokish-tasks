@@ -1,15 +1,3 @@
-/*
-* Copyright (C) 2011- stephane coutant
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
-*/
 
 package org.scoutant.blokish.model;
 
@@ -36,18 +24,15 @@ public class AI  {
 
 	public int adaptedLevel = 3;
 
-	// Creates an AI that evaluates moves for the given game.
 	public AI(Game game) {
 		this.game = game;
 	}
 
-	// Checks whether the player has at least one legal move.
 	public boolean hasMove(int color) {
 		Board board = game.boards.get(color);
 		for (Square seed : board.seeds()) {
 			for (int p=0; p<board.pieces.size(); p++) {
 				Piece piece = board.pieces.get(p);
-				// Fixing issue #3, changing order rotate/flip
 				for( int f=0; f<piece.flips; f++, piece.flip()) {
 					for (int r=0; r<piece.rotations; r++, piece.rotate(1)) {
 						for (Square s : piece.squares()) {
@@ -67,17 +52,14 @@ public class AI  {
 		return false;
 	}
 	
-	// Chooses a move for the player at the requested difficulty level.
 	public Move think(int color, int level) {
 		if (game.boards.get(color).pieces.isEmpty()) {
 			Log.d(tag, "no more pieces for player : " + color);
-			// no big deal, AI will continue for the other players. At the very end current player will be granted the winning message.
 			game.boards.get(color).over = true;
 			return null;
 		}
 		Log.d(tag, "--------------------------------------------------------------------------------");
 		level = Math.min(level, adaptedLevel);
-		// reinforce player 1 compared to player 2 and 3
 		if (level>1 && color!=1 ) level--;
 		Log.d(tag, "thinking for player : " + color + ", upto # moves : " + maxMoves[level]);
 		List<Move> moves = thinkUpToNMoves(color, level);
@@ -90,13 +72,10 @@ public class AI  {
 		Collections.reverse(moves);
 		Move move = moves.get( 0);
 		Log.d(tag, "best move actually is : " + move);
-		// TODO may be many moves with O1 and I2. But only 1 or 2 nice moves!!
 		if (moves.size()>20) {
-			// let's prune trivial moves
 			for (int k=moves.size()-1; k>=2; k--) {
 				if (moves.get(k).piece.count<=2) moves.remove(k);
 			}
-			// Now if we do have a significant # of moves, lets randomized among the very best ones.
 			if (moves.size()> 10) {
 				move = moves.get( random.nextInt(3));
 			} else {
@@ -107,11 +86,9 @@ public class AI  {
 		return move;
 	}
 	
-	// Generates and scores candidate moves up to the level limit.
 	protected List<Move> thinkUpToNMoves(int color, int level) {
 		List<Move> moves = new ArrayList<Move>();
 		Board board = game.boards.get(color);
-		// Most of time , in the middle of the game, any player has about 10 to 20 seeds.
 		int nbSeeds = board.seeds().size();
 		Log.d(tag, "# of seeds : " + nbSeeds);
 		if (nbSeeds==0) return moves;
@@ -125,7 +102,6 @@ public class AI  {
 			int movesAgainstSeed=0;
 			Log.d(tag, "---- seed : " + seed);
 			int maxMovesAgainstSeed = maxMoves[level] / nbSeeds;
-//			Log.d(tag, "considering # of moves : " + maxMovesAgainstSeed );
 			for (int p=0; p<board.pieces.size() && movesAgainstSeed<maxMovesAgainstSeed; p++) {
 				Piece piece = board.pieces.get(p);
 				for (int r=0; r<piece.rotations; r++, piece.rotate(1)) {
@@ -140,7 +116,6 @@ public class AI  {
 								}
 								int score = SIZE_WEIGHT * piece.count;
 								if (board.pieces.size()> board.nbPieces-5) {
-									// encourage moving to the center, this extra bonus only for pentaminos
 									int io = game.size/2 - i;
 									int jo = game.size/2 - j;
 									score -= CENTER_WEIGHT * (io*io + jo*jo);
@@ -149,12 +124,10 @@ public class AI  {
 								score += SEEDS_WEIGHT * seedsIfAdding ;
 								int enemyscore = game.scoreEnemySeedsIfAdding(board.color, piece, i, j);
 								score -= ENEMY_SEEDS_WEIGHT * enemyscore;
-								// Endgame deep thinking
 								if (board.pieces.size() < 9) {
 									score += CHAINING_WEIGHT*chainingScore(color, move);
 								}
 								move.score = score;
-//								Log.d(tag, ""+move);
 								if (board.pieces.size()<= board.nbPieces-4 || piece.count>=5) {
 									moves.add(move);
 								}
@@ -176,7 +149,6 @@ public class AI  {
 
 	private int[][] ij = new int [20][20];
 	
-	// Scores the best follow-up move created by a candidate move.
 	protected int chainingScore(int color, Move move) {
 		Board board = game.boards.get(color);
 		Piece played = move.piece;
@@ -192,7 +164,6 @@ public class AI  {
 				ij[i][j] = board.ij[i][j];
 			}
 		}
-		// let's place 'played' onto board.
 		for(Square s : played.squares(color)) {
 			int I = move.i+s.i;
 			int J = move.j+s.j;
@@ -217,7 +188,6 @@ public class AI  {
 									second = new Move(piece, i, j);
 									score = piece.count;
 								}
-								// TODO also include # of promissing seeds?
 							}
 						}
 					}
@@ -228,7 +198,6 @@ public class AI  {
 		return score;
 	}
 	
-	// Checks whether a piece would overlap the simulated board.
 	public boolean overlaps( int color, Piece piece, int i, int j) {
 		for(Square s : piece.squares()) {
 			int I = i+s.i;
@@ -239,7 +208,6 @@ public class AI  {
 	}
 
 	
-	// Lowers the search level when a search takes too long.
 	private void autoAdaptLevel(long startedAt) {
 		long duration = new Date().getTime()- startedAt;
 		Log.d(tag, "lasted : " + duration );
