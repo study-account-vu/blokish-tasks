@@ -17,7 +17,7 @@ Only one unconfirmed piece should be on the board at a time. Currently, it is po
 
 ## Your Task
 
-**Investigate why another piece can be added while one is already active, and modify the code to fix the bug.**
+**Investigate why another piece can be added while one is already active, and modify the source code to fix the bug. The main source code files are in blokish/app/src/main/java/org/scoutant/blokish**
 
 ## AI Assistance
 
