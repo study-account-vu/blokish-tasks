@@ -20,6 +20,10 @@ The circular controls around a selected piece can be used to rotate it. Currentl
 
 **Investigate why the bottom circular control does not rotate the piece correctly, and modify the code to fix the bug.**
 
+## AI Assistance
+
+You may use the AI coding assistant available in the IDE throughout this task. **The AI is in Agent mode**, which allows it to explore the repository, inspect files, and edit files directly. You may use it to help with debugging and making code changes.
+
 ## Test Your Fix
 
 After making a code change, run the following from the Blokish repository root:

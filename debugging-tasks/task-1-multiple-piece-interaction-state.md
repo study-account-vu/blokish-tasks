@@ -19,6 +19,10 @@ Only one unconfirmed piece should be on the board at a time. Currently, it is po
 
 **Investigate why another piece can be added while one is already active, and modify the code to fix the bug.**
 
+## AI Assistance
+
+You may use the AI coding assistant available in the IDE throughout this task. **The AI is in Agent mode**, which allows it to explore the repository, inspect files, and edit files directly. You may use it to help with debugging and making code changes.
+
 ## Test Your Fix
 
 After making a code change, run the following from the Blokish repository root:
